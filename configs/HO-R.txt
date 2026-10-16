@@ -1,0 +1,148 @@
+Building configuration...
+
+Current configuration : 2908 bytes
+!
+! Last configuration change at 10:42:48 PKT Fri Oct 16 2026
+! NVRAM config last updated at 10:36:39 PKT Fri Oct 16 2026
+!
+version 15.0
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname HO-R2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+username umair privilege 15 secret 5 $1$jL5M$s1e0hN1fFOqoCZgCVngna/
+no aaa new-model
+clock timezone PKT 5
+!
+ip cef
+ip domain-name lab.local
+!
+no ipv6 cef
+!
+!
+!
+!
+ip ssh version 2
+!
+!
+crypto isakmp policy 10
+ encr aes 256
+ authentication pre-share
+ group 5
+crypto isakmp key 1234 address 10.10.100.2
+!
+!
+crypto ipsec transform-set TS esp-aes 256
+!
+crypto map CMAP 10 ipsec-isakmp
+ set peer 10.10.100.2
+ set transform-set TS
+ match address 101
+!
+!
+!
+!
+!
+interface Tunnel0
+ ip address 192.168.1.1 255.255.255.252
+ tunnel source 10.10.100.1
+ tunnel destination 10.10.100.2
+!
+interface Ethernet0/0
+ ip address 200.1.1.2 255.255.255.240
+ ip nat outside
+!
+interface Ethernet0/1
+ ip address 10.10.100.1 255.255.255.252
+ ip nat inside
+ crypto map CMAP
+!
+interface Ethernet0/2
+ no ip address
+ ip nat inside
+!
+interface Ethernet0/2.10
+ encapsulation dot1Q 10
+ ip address 10.10.10.1 255.255.255.0
+ ip access-group 100 in
+ ip helper-address 10.10.40.10
+ ip nat inside
+!
+interface Ethernet0/2.20
+ encapsulation dot1Q 20
+ ip address 10.10.20.1 255.255.255.0
+ ip access-group 10 out
+ ip helper-address 10.10.40.10
+ ip nat inside
+!
+interface Ethernet0/2.30
+ encapsulation dot1Q 30
+ ip address 10.10.30.1 255.255.255.0
+ ip helper-address 10.10.40.10
+ ip nat inside
+!
+interface Ethernet0/2.40
+ encapsulation dot1Q 40
+ ip address 10.10.40.1 255.255.255.0
+ ip nat inside
+!
+interface Ethernet0/2.99
+ encapsulation dot1Q 99
+ ip address 10.10.99.1 255.255.255.0
+ ip nat inside
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+!
+router ospf 1
+ network 10.10.10.0 0.0.0.255 area 0
+ network 10.10.20.0 0.0.0.255 area 0
+ network 10.10.30.0 0.0.0.255 area 0
+ network 10.10.40.0 0.0.0.255 area 0
+ network 10.10.100.0 0.0.0.3 area 0
+!
+ip nat inside source list 1 interface Ethernet0/0 overload
+ip nat inside source list 2 interface Ethernet0/0 overload
+ip nat inside source static 10.10.40.10 200.1.1.10
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 200.1.1.1
+ip route 10.10.50.0 255.255.255.0 192.168.1.2
+ip route 10.10.60.0 255.255.255.0 192.168.1.2
+!
+!
+access-list 1 permit 10.10.0.0 0.0.255.255
+access-list 100 permit udp any eq bootpc any eq bootps
+access-list 100 permit icmp 10.10.10.0 0.0.0.255 host 10.10.10.1
+access-list 100 permit tcp 10.10.10.0 0.0.0.255 host 10.10.40.10 eq www
+access-list 100 deny   ip any any
+access-list 101 permit gre host 10.10.100.1 host 10.10.100.2
+!
+!
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ login local
+ transport input ssh
+!
+ntp clock-period 17179912
+ntp server 10.10.40.10
+end

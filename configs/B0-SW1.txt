@@ -1,0 +1,99 @@
+
+Building configuration...
+
+Current configuration : 1120 bytes
+!
+! Last configuration change at 15:50:19 PKT Fri Oct 16 2026
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+service compress-config
+!
+hostname BO-SW1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+clock timezone PKT 5 0
+!
+!
+!
+!
+!
+no ipv6 cef
+!
+!
+!
+!
+!
+!
+!
+ip cef
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ switchport trunk allowed vlan 50,60,99
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 99
+ switchport mode trunk
+ duplex full
+!
+interface Ethernet0/1
+ switchport access vlan 50
+ switchport mode access
+ duplex full
+!
+interface Ethernet0/2
+ switchport access vlan 60
+ switchport mode access
+ duplex full
+!
+interface Ethernet0/3
+!
+ip forward-protocol nd
+!
+no ip http server
+ip ssh server algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+ip ssh client algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+!
+!
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ login
+!
+ntp server 10.10.40.10
+!
+!
+end
